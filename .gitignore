@@ -1,32 +1,77 @@
-# Prerequisites
-*.d
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <algorithm> // для std::remove_if
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+using namespace std;
 
-# Precompiled Headers
-*.gch
-*.pch
+struct Contact {
+    string name;
+    string phone;
+    string email;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+    Contact(const string& n, const string& p, const string& e) 
+        : name(n), phone(p), email(e) {}
+};
 
-# Fortran module files
-*.mod
-*.smod
+class PhoneBook {
+private:
+    vector<Contact> contacts;
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+public:
+    void addContact(const string& name, const string& phone, const string& email) {
+        contacts.emplace_back(name, phone, email);
+    }
 
-# Executables
-*.exe
-*.out
-*.app
+    void removeContact(const string& name) {
+        contacts.erase(remove_if(contacts.begin(), contacts.end(), [&](Contact& c) {
+            return c.name == name;
+        }), contacts.end());
+    }
+
+    Contact* findContact(const string& name) {
+        for (auto& contact : contacts) {
+            if (contact.name == name) {
+                return &contact;
+            }
+        }
+        return nullptr;
+    }
+
+    void updateContact(const string& name, const string& newPhone, const string& newEmail) {
+        Contact* contact = findContact(name);
+        if (contact) {
+            contact->phone = newPhone; 
+            contact->email = newEmail; 
+        }
+    }
+
+    void saveToFile(const string& filename) {
+        ofstream outFile(filename);
+        for (const auto& contact : contacts) {
+            outFile << contact.name << "," << contact.phone << "," << contact.email << endl;
+        }
+        outFile.close();
+    }
+
+    void loadFromFile(const string& filename) {
+        ifstream inFile(filename);
+        string line;
+        while (getline(inFile, line)) {
+            size_t pos1 = line.find(',');
+            size_t pos2 = line.find(',', pos1 + 1);
+            string name = line.substr(0, pos1);
+            string phone = line.substr(pos1 + 1, pos2 - pos1 - 1);
+            string email = line.substr(pos2 + 1);
+            addContact(name, phone, email);
+        }
+        inFile.close();
+    }
+
+    void displayContacts() {
+        for (const auto& contact : contacts) {
+            cout << "Name: " << contact.name << ", Phone: " << contact.phone << ", Email: " << contact.email << endl;
+        }
+    }
+};
