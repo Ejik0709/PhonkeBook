@@ -2,7 +2,9 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <algorithm> // для std::remove_if
+#include <algorithm>
+
+// Землянов Стас
 
 using namespace std;
 
